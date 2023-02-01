@@ -1,0 +1,87 @@
+    1  whoami
+    2  sudo apt get git
+    3  sudo apt install git
+    4  sudo apt get git
+    5  apt get git 
+    6  usermod -sG sudo aria
+    7  usermod -aG sudo aria
+    8  ls
+    9  dir
+   10  cd ..
+   11  ls
+   12  cd ..
+   13  ..
+   14  cd ..
+   15  ls
+   16  cd etc
+   17  ls
+   18  cd pwd
+   19  cd passwd
+   20  cat passwd
+   21  cd ..
+   22  usermod -aG sudo aria
+   23  su -
+   24  git
+   25  man git
+   26  ls
+   27  cd Documents/
+   28  ls
+   29  mkdir 
+   30  mkdir Git
+   31  ls
+   32  cd Git
+   33  mkdir PA1
+   34  cd pa1
+   35  cd PA1
+   36  cd ..
+   37  rmdir PA1
+   38  ls
+   39  mkdir CS149
+   40  cd CS149/
+   41  mkdir pa1
+   42  cd pa1
+   43  cd ..
+   44  git
+   45  git init
+   46  git config --global
+   47  git config --global --add 
+   48  git config --global --add name PrsnVkngs
+   49  git config --global --add username PrsnVkngs
+   50  git config --global --add email oskaraattar@gmail.com
+   51  git config --global --add oskaraattar@gmail.com email
+   52  git
+   53  git rm
+   54  cd ..
+   55  git rm ./CS149/
+   56  git clone https://github.com/PrsnVkngs/CS149.git
+   57  rmdir ./CS149/
+   58  sudo rmdir ./CS149/
+   59  cd ..
+   60  mkdir Code
+   61  cd Code/
+   62  git clone https://github.com/PrsnVkngs/CS149.git
+   63  ls
+   64  ls CS149/
+   65  cd CS149/
+   66  wget -0 out.pdf https://tinyurl.com/yy94jltt
+   67  wget -O out.pdf https://tinyurl.com/yy94jltt
+   68  ls
+   69  mkdir WS1
+   70  mv 
+   71  mv out.pdf WS!
+   72  mv out.pdf WS1
+   73  ls
+   74  ls WS!
+   75  mv --help
+   76  cat WS!
+   77  mv WS! out.pdf
+   78  ls
+   79  mv --help
+   80  mv out.pdf -t WS1
+   81  ls
+   82  ls WS1
+   83  cd WS1
+   84  ls
+   85  git add .
+   86  history -h
+   87  history > cmds.log
