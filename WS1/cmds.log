@@ -43,12 +43,12 @@
    43  cd ..
    44  git
    45  git init
-   46  git config --global
-   47  git config --global --add 
-   48  git config --global --add name PrsnVkngs
-   49  git config --global --add username PrsnVkngs
-   50  git config --global --add email oskaraattar@gmail.com
-   51  git config --global --add oskaraattar@gmail.com email
+   46  
+   47   
+   48  
+   49  
+   50  lines 46 to 51 removed for credential safety
+   51  
    52  git
    53  git rm
    54  cd ..
