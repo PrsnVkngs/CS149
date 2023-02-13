@@ -1,0 +1,13 @@
+  336  nano 3_22.c
+  337  date
+  338  pwd
+  339  cd
+  340  cd Desktop
+  341  ls -latr ; mkdir ws2 ; cd ws2
+  342  ls -latr
+  343  echo $?
+  344  man ps
+  345  ps aux
+  346  top
+  347  cd .. ; cd .. ; cd Documents/Code/CS149/WS2
+  348  history > worksheet2.log
