@@ -1,0 +1,16 @@
+  185  ./5_23
+  186  git add 5_23.c
+  187  git commit
+  188  git push
+  189  wget https://github.com/torvalds/linux/archive/master.zip
+  190  unzip master.zip
+  191  cd linux-master/
+  192  ls
+  193  pwd
+  194  alias l='ls -latr'
+  195  l
+  196  find . -name mem.c
+  197  find . -name mem.c | xargs head
+  198  find . -name mem.c | xargs grep 86
+  199  cd ..
+  200  history > worksheet3.log
