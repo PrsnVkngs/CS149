@@ -13,27 +13,44 @@ typedef struct {
 
 typedef struct {
 	int size;
-	NameEntry *entry;
+	int count;
+	NameEntry *entries; // we will assign this to the base address of some allocated memory equal to the
+			    // total size of the set times the size of NameEntry. Therefore, we can treat it as an array.
 } HashSet;
 
-int hash_name(char *name) {
+unsigned long hash_name(char *name) {
 	// Given that we are given the names of each person, and we know from the assignment statement that they are 
-	// in ASCII format, we can make a simple hash function that just sums up the ASCII values of the characters 
-	// in the name.
-	int sum = 0;
+	// in ASCII format, we can utilize the DJB2 hash function to create a hash for the name. A simple sum of
+	// ASCII values proved to be inadequate in testing because different combinations of values could result
+	// in the same hash.
+	unsigned long hash = 5381;
+	int c;
 
-	for(int i = 0; i < strlen(name); i++) {
-		sum += name[i];
+	while (c = *name++) {
+		hash = ( (hash << 5) + hash) + c;
 	}
-	return sum % 100;	
+
+	return hash;
+
 }
 
 HashSet *create_hash_set(int size) {
 	HashSet *set = (HashSet *) malloc(sizeof(HashSet));
 	set -> size = size;
-	set -> entry = (NameEntry *) calloc(size, sizeof(NameEntry));
+	set -> count = 0;
+	set -> entries = (NameEntry *) calloc(size, sizeof(NameEntry));
 	return set;
 }
+
+void put(HashSet *set, char *name, int value) {
+
+	unsigned long index = hash_name(name);
+
+
+
+}
+
+
 
 
 
