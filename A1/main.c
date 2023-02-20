@@ -1,9 +1,41 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX_NAME_LEN 30
 #define MAX_LINE_LEN 50 //this value is for when we scan in the line, just to bullet proof our code.
 #define MAX_NAMES 100
+
+typedef struct {
+	char key[MAX_NAME_LEN];
+	int value;
+} NameEntry;
+
+typedef struct {
+	int size;
+	NameEntry *entry;
+} HashSet;
+
+int hash_name(char *name) {
+	// Given that we are given the names of each person, and we know from the assignment statement that they are 
+	// in ASCII format, we can make a simple hash function that just sums up the ASCII values of the characters 
+	// in the name.
+	int sum = 0;
+
+	for(int i = 0; i < strlen(name); i++) {
+		sum += name[i];
+	}
+	return sum % 100;	
+}
+
+HashSet *create_hash_set(int size) {
+	HashSet *set = (HashSet *) malloc(sizeof(HashSet));
+	set -> size = size;
+	set -> entry = (NameEntry *) calloc(size, sizeof(NameEntry));
+	return set;
+}
+
+
 
 int main(int argc, char *argv[]) {
 
