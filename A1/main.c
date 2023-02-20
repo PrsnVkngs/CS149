@@ -11,48 +11,58 @@ typedef struct {
 	int value;
 } NameEntry;
 
-typedef struct {
-	int size;
-	int count;
+typedef struct {	
 	NameEntry *entries; // we will assign this to the base address of some allocated memory equal to the
 			    // total size of the set times the size of NameEntry. Therefore, we can treat it as an array.
 } HashSet;
 
-unsigned long hash_name(char *name) {
+unsigned int hash_name(char *name) {
 	// Given that we are given the names of each person, and we know from the assignment statement that they are 
 	// in ASCII format, we can utilize the DJB2 hash function to create a hash for the name. A simple sum of
 	// ASCII values proved to be inadequate in testing because different combinations of values could result
 	// in the same hash.
-	unsigned long hash = 5381;
+	unsigned int hash = 5381;
 	int c;
 
-	while (c = *name++) {
+	while ( (c = *name++) ) {
 		hash = ( (hash << 5) + hash) + c;
 	}
 
-	return hash;
+	return hash % MAX_NAMES;
 
 }
 
-HashSet *create_hash_set(int size) {
+HashSet *create_hash_set() {
 	HashSet *set = (HashSet *) malloc(sizeof(HashSet));
-	set -> size = size;
-	set -> count = 0;
-	set -> entries = (NameEntry *) calloc(size, sizeof(NameEntry));
+	set -> entries = (NameEntry *) calloc(MAX_NAMES, sizeof(NameEntry));
 	return set;
 }
 
-void put(HashSet *set, char *name, int value) {
+void put(HashSet *set, char *name) {
 
-	unsigned long index = hash_name(name);
+	unsigned int index = hash_name(name);
 
+	while (set->entries[index].value != 0) {
+		if (strcmp(set->entries[index].key, name) == 0) {
+			set->entries[index].value++;
+			return;
+		}
+		index = (index+1) % MAX_NAMES;
+	}
 
-
+	strcpy(set->entries[index].key, name);
+	set->entries[index].value+=1;
 }
 
+void displayResults(HashSet *set) {
 
+	for (int i = 0; i < MAX_NAMES; i++) {
+		if (set->entries[i].value != 0) {
+			printf("Name: %s\t\tAppearances: %d", set->entries[i].key, set->entries[i].value);
+		}
+	}
 
-
+}
 
 int main(int argc, char *argv[]) {
 
@@ -66,6 +76,8 @@ int main(int argc, char *argv[]) {
 		printf("The program could not find the file %s.\n", argv[1]);
 		return 1;
 	}
+
+	// add hashmap here
 
 	char line[MAX_LINE_LEN];
 	char name[MAX_NAME_LEN+1];
