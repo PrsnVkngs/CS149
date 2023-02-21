@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
 		line[strcspn(line, "\n")] = '\0';
 
 		if (strlen(line) == 0) {
-			printf("Warning - Line %d is empty.\n", line_num);
+			fprintf(stderr, "Warning - Line %d is empty.\n", line_num);
 			continue;
 		}
 
