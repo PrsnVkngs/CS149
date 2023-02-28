@@ -1,0 +1,18 @@
+  329  wget http://www.apuebook.com/src.3e.tar.gz
+  330  gunzip src.3e.tar.tz
+  331  gunzip src.3e.tar.gz
+  332  tar xvf src.3e.tar
+  333  cd apue.3e
+  334  cd proc
+  335  make all
+  336  ./fork1
+  337  ./fork2
+  338  pwd
+  339  pstree
+  340  ps -a -f -x
+  341  ps -a -f -x | more
+  342  top
+  343  man kill
+  344  echo $?
+  345  echo $$
+  346  history > ws4.log
