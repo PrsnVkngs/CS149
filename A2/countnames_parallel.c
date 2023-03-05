@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
 	int countPipe[2];
 	pid_t pid;
 
-	printf("Args passed in:\n%s %s %s", argv[0], argv[1], argv[2]);
+	// printf("Args passed in:\n%s %s %s", argv[0], argv[1], argv[2]);
 
 	if (pipe(countPipe) == -1) {
 		fprintf(stderr, "Pipe creation failed.\n");
@@ -166,57 +166,58 @@ int main(int argc, char *argv[]) {
 	}
 
 	for (fileNum = 1; fileNum < argc; fileNum++) {
-	       pid = fork();
-	}
+		pid = fork();
+	
 
-	if ( pid < 0 ) {
-		fprintf(stderr, "Fork failed at process: %d.\n", getpid());
-		return 1;
-	}
-	else if ( pid == 0 ) {
-		printf("The file we are trying to open in the child is %s\n", argv[fileNum]);
-		FILE *nameFile = fopen(argv[fileNum], "r");
-		if (nameFile == NULL) {
-			fprintf(stderr, "File open for file %s failed.\n", argv[fileNum]);
+		if ( pid < 0 ) {
+			fprintf(stderr, "Fork failed at process: %d.\n", getpid());
 			return 1;
 		}
-
-		printf("Child process %d running.\n", getpid());
-
-		while(fgets(line, MAX_LINE_LEN, nameFile) != NULL) {
-
-			line[strcspn(line, "\n")] = '\0';
-
-			if (strlen(line) == 0) {
-				fprintf(stderr, "Warning - Line %d is empty.\n", line_num);
-				continue;
+		else if ( pid == 0 ) {
+			// printf("The file we are trying to open in the child is %s\n", argv[fileNum]);
+			FILE *nameFile = fopen(argv[fileNum], "r");
+			if (nameFile == NULL) {
+				fprintf(stderr, "File open for file %s failed.\n", argv[fileNum]);
+				return 1;
 			}
 
-			if ( sscanf(line, "%30[^\n]", name) == 1 ) {
+			// printf("Child process %d running.\n", getpid());
 
-				put(set, name);
+			while(fgets(line, MAX_LINE_LEN, nameFile) != NULL) {
 
+				line[strcspn(line, "\n")] = '\0';
+
+				if (strlen(line) == 0) {
+					fprintf(stderr, "Warning - Line %d is empty.\n", line_num);
+					continue;
+				}
+
+				if ( sscanf(line, "%30[^\n]", name) == 1 ) {
+
+					put(set, name);
+
+				}
+				else {
+					fprintf(stderr, "error reading line %d\n", line_num);
+				}
+				line_num++;
 			}
-			else {
-				fprintf(stderr, "error reading line %d\n", line_num);
-			}
-			line_num++;
+
+			// displayResults(set);
+			// write the data back to the pipe here.
+			freeSet(set);
+			fclose(nameFile);
+
+			return 0;
+
 		}
-
-		displayResults(set);
-		freeSet(set);
-		fclose(nameFile);
-
-		return 0;
-
 	}
-	else {
-		
+	
+	if ( pid != 0 ) {
+
 		for (int i = 1; i < argc; i++) {
 			wait(NULL);
-		}
-
-		printf("This is the main function reporting.\n");
+		}		
 
 		return 0;
 
