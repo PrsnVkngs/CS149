@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #define MAX_NAME_LEN 30
 #define MAX_LINE_LEN 31 //this value is for when we scan in the line, just to bullet proof our code.
@@ -157,12 +159,12 @@ int main(int argc, char *argv[]) {
 	int countPipe[2];
 	pid_t pid;
 
-	if (pipe(countPipe)) == -1 {
+	if (pipe(countPipe) == -1) {
 		fprintf(stderr, "Pipe creation failed.\n");
 		return 1;
 	}
 
-	for (fileNum = 1; fileNum < argc-1; fileNum++) {
+	for (fileNum = 1; fileNum < argc; fileNum++) {
 	       pid = fork();
 	}
 
@@ -170,35 +172,52 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "Fork failed at process: %d.\n", getpid());
 		return 1;
 	}
-
-
-
-	while(fgets(line, MAX_LINE_LEN, nameFile) != NULL) {
-
-		line[strcspn(line, "\n")] = '\0';
-
-		if (strlen(line) == 0) {
-			fprintf(stderr, "Warning - Line %d is empty.\n", line_num);
-			continue;
+	else if ( pid == 0 ) {
+		FILE *nameFile = fopen(argv[fileNum], "r");
+		if (nameFile == NULL) {
+			fprintf(stderr, "File open for file %s failed.\n", argv[fileNum]);
+			return 1;
 		}
 
-		if ( sscanf(line, "%30[^\n]", name) == 1 ) {
+		printf("Child process %d running.\n", getpid());
 
-			put(set, name);
+		while(fgets(line, MAX_LINE_LEN, nameFile) != NULL) {
 
+			line[strcspn(line, "\n")] = '\0';
+
+			if (strlen(line) == 0) {
+				fprintf(stderr, "Warning - Line %d is empty.\n", line_num);
+				continue;
+			}
+
+			if ( sscanf(line, "%30[^\n]", name) == 1 ) {
+
+				put(set, name);
+
+			}
+			else {
+				fprintf(stderr, "error reading line %d\n", line_num);
+			}
+			line_num++;
 		}
-		else {
-			printf("error reading line %d\n", line_num);
-		}
-		line_num++;
+
+		displayResults(set);
+		freeSet(set);
+		fclose(nameFile);
+
+		return 0;
+
 	}
+	else {
+		
+		for (int i = 1; i < argc; i++) {
+			wait(NULL);
+		}
 
-	displayResults(set); // calls the display results function to show the counts of all the names.
+		printf("This is the main function reporting.\n");
 
-	fclose(nameFile); // close the file that we are reading from.
-			 
-	freeSet(set); // free the memory allocated to the HashSet.
+		return 0;
 
-	return 0;
+	}
 
 }
