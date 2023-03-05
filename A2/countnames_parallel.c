@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -159,6 +158,8 @@ int main(int argc, char *argv[]) {
 	int countPipe[2];
 	pid_t pid;
 
+	printf("Args passed in:\n%s %s %s", argv[0], argv[1], argv[2]);
+
 	if (pipe(countPipe) == -1) {
 		fprintf(stderr, "Pipe creation failed.\n");
 		return 1;
@@ -173,6 +174,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	else if ( pid == 0 ) {
+		printf("The file we are trying to open in the child is %s\n", argv[fileNum]);
 		FILE *nameFile = fopen(argv[fileNum], "r");
 		if (nameFile == NULL) {
 			fprintf(stderr, "File open for file %s failed.\n", argv[fileNum]);
