@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -20,9 +21,10 @@
  * this struct is for the entries in the set, and has a key variable which stores the name,
  * as well as an integer value for the number of occurences this name has made in the file.
  */
-typedef struct {
+typedef struct Name {
 	char key[MAX_NAME_LEN];
 	int value;
+	struct Name *next;
 } NameEntry;
 
 /*
@@ -38,20 +40,26 @@ typedef struct {
 
 /*
  * Hash_name is the hash function that the hash_set relies on. It utilizes a slightly modified 
- * DJB2 algorithm, where it uses integers instead of longs, because the keyspace of this application
- * is relatively small.
+ * FNV-1a algorithm, where it uses integers instead of longs, because the keyspace of this application
+ * is relatively small. In A1, we used the DJB2 algorithm. We are going to try the FNV 1a algorithm here.
  * Assumes that the name passed in is a valid name array with ascii valued chars.
  * Returns an integer remainder of the hash function result within the size of the set.
  */
 unsigned int hash_name(char *name) {
-	// Given that we are given the names of each person, 
-	// and we know from the assignment statement that they are 
-	// in ASCII format, we can utilize the DJB2 hash function to create a hash for the name. 
-	// A simple sum of
-	// ASCII values proved to be inadequate in testing because different 
-	// combinations of values could result
-	// in the same hash.
-	unsigned int hash = 5381;
+
+	unsigned int OFFSET = 0x811c9dc5;
+	unsigned int PRIME = 0x01000193;
+
+	unsigned int hash = OFFSET;
+
+	while (*name) {
+		hash ^= (unsigned int)(*name++);
+		hash *= PRIME;
+	}
+
+	return hash % MAX_NAMES;
+
+	/* unsigned int hash = 5381;
 	int c;
 
 	while ( (c = *name++) ) {
@@ -59,6 +67,7 @@ unsigned int hash_name(char *name) {
 	}
 
 	return hash % MAX_NAMES;
+	*/ // DJB2 code just incase it needs to be reverted.
 
 }
 
@@ -84,17 +93,55 @@ HashSet *create_hash_set() {
 void put(HashSet *set, char *name) {
 
 	unsigned int index = hash_name(name);
+	
+	NameEntry *currentName = &set->entries[index];
 
+//	printf("The value associate with the name: %s at index %d is %d\n", currentName->key, index, currentName->value);
+	if ( currentName->value == 0 ) {
+		strcpy(currentName->key, name);
+		currentName->value=1;
+		currentName->next = NULL;
+		return;
+	}
+
+	while (true) {
+
+		if (strcmp(currentName->key, name) == 0) {
+			currentName->value+=1;
+			return;
+		}
+		
+		if ( currentName->next == NULL ) {
+			break;
+		}
+		currentName = currentName->next;
+
+	}
+
+	printf("Collision occurred for %s, creating bucket at %d\n", name, index);
+
+	NameEntry *newEntry = calloc(1, sizeof(NameEntry));
+
+	newEntry->value = 1;
+	strcpy(newEntry->key, name);
+	newEntry->next = NULL;
+
+	currentName->next = newEntry;
+
+	return;
+
+	/*
 	while (set->entries[index].value != 0) {
 		if (strcmp(set->entries[index].key, name) == 0) {
 			set->entries[index].value++;
 			return;
 		}
+		printf("Trying to insert %s, however, %s is occupying it at index %d.\n", name, set->entries[index].key, index);
 		index = (index+1) % MAX_NAMES;
 	}
 
 	strcpy(set->entries[index].key, name);
-	set->entries[index].value+=1;
+	set->entries[index].value+=1; */ // old code for preservation purpose.
 }
 
 /*
@@ -104,9 +151,16 @@ Assumption: The set pointer passed in is valid and not null.
  */
 void displayResults(HashSet *set) {
 
+	NameEntry *nullptr = NULL;
+
+	NameEntry *temp;
 	for (int i = 0; i < MAX_NAMES; i++) {
-		if (set->entries[i].value != 0) {
-			printf("%s\t-\t%d\n", set->entries[i].key, set->entries[i].value);
+		temp = &set->entries[i];
+		while (temp!=nullptr) {
+			if (temp->value != 0) {
+				printf("%s\t-\t%d\n", temp->key, temp->value);
+			}
+			temp = temp->next;
 		}
 	}
 
@@ -119,7 +173,21 @@ void displayResults(HashSet *set) {
  * */
 void freeSet(HashSet *set) {
 
-	free(set->entries);
+	NameEntry *nullptr = NULL;
+
+	NameEntry *curr;
+	NameEntry *next;
+	for (int i = 0; i < MAX_NAMES; i++) {
+		curr = &set->entries[i];
+		while (curr != nullptr || curr->value != 0) {
+			next = curr -> next;
+			//printf("about to free memory address: %p | in a bucket at index: %d - name here is: %s\n", curr, i, curr->key);
+			free (curr);
+			curr = next;
+		}
+	}
+	printf("freed buckets\n");	
+	// free(set->entries);
 	free(set);
 
 }
@@ -203,7 +271,7 @@ int main(int argc, char *argv[]) {
 				line_num++;
 			}
 
-			// displayResults(set);
+			 displayResults(set);
 			// write the data back to the pipe here.
 			freeSet(set);
 			fclose(nameFile);
