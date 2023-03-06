@@ -2,8 +2,8 @@
  * Description: This program serves as a microservice to count the names in a given file.
  * Author Name: Oskar Attar
  * Author Email: oskar.attar@sjsu.edu
- * Last modified date: 03/03/2023
- * Creation date: 2/18/2023
+ * Last modified date: 03/06/2023
+ * Creation date: 3/03/2023
  */
 
 #include <stdio.h>
@@ -118,7 +118,7 @@ void put(HashSet *set, char *name) {
 
 	}
 
-	printf("Collision occurred for %s, creating bucket at %d\n", name, index);
+	// printf("Collision occurred for %s, creating bucket at %d\n", name, index);
 
 	NameEntry *newEntry = calloc(1, sizeof(NameEntry));
 
@@ -187,7 +187,7 @@ void freeSet(HashSet *set) {
 		}
 	}
 	printf("freed buckets\n");	
-	// free(set->entries);
+	free(set->entries);
 	free(set);
 
 }
@@ -243,6 +243,9 @@ int main(int argc, char *argv[]) {
 		}
 		else if ( pid == 0 ) {
 			// printf("The file we are trying to open in the child is %s\n", argv[fileNum]);
+
+			close (countPipe[0]); // close read end of pipe.
+
 			FILE *nameFile = fopen(argv[fileNum], "r");
 			if (nameFile == NULL) {
 				fprintf(stderr, "File open for file %s failed.\n", argv[fileNum]);
@@ -271,10 +274,13 @@ int main(int argc, char *argv[]) {
 				line_num++;
 			}
 
-			 displayResults(set);
+			//  displayResults(set);
 			// write the data back to the pipe here.
-			freeSet(set);
+			write(countPipe[1], &set, sizeof(set));
+			// freeSet(set); // we can read the set into memory in the parent process, but if we free the memory here,
+			// we will get a segfault.
 			fclose(nameFile);
+			close(countPipe[1]);
 
 			return 0;
 
@@ -283,8 +289,16 @@ int main(int argc, char *argv[]) {
 	
 	if ( pid != 0 ) {
 
+		close(countPipe[1]); // close write end of pipe.
+
+		HashSet *childResult;
+
 		for (int i = 1; i < argc; i++) {
 			wait(NULL);
+			read(countPipe[0], childResult, sizeof(childResult));
+			printf("Results from Child %d:\n", i);
+			displayResults(childResult);
+			freeSet(childResult);
 		}		
 
 		return 0;
