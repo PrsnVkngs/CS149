@@ -31,7 +31,7 @@ typedef struct Name {
  * struct for the HashSet, is also assigned a name with typedef.
  */
 typedef struct {	
-	NameEntry *entries; // we will assign this to the base address of some 
+	NameEntry entries[MAX_NAMES]; // we will assign this to the base address of some 
 			    // allocated memory equal to the
 			    // total size of the set times the size of NameEntry. 
 			    // Therefore, we can treat it as an array.
@@ -79,7 +79,7 @@ unsigned int hash_name(char *name) {
  */
 HashSet *create_hash_set() {
 	HashSet *set = (HashSet *) malloc(sizeof(HashSet));
-	set -> entries = (NameEntry *) calloc(MAX_NAMES, sizeof(NameEntry));
+//	set -> entries = (NameEntry *) calloc(MAX_NAMES, sizeof(NameEntry));
 	return set;
 }
 
@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
 	// the following code with the if statement attempts to open the file.
 	// If the file pointer is a null pointer then we throw an error and terminate the program.	
 
-	HashSet *set = create_hash_set(); // creates a new HashSet variable from the method. 
+
 
 	char line[MAX_LINE_LEN]; // temporary variable for the loop to hold the value read in by fgets
 	char name[MAX_NAME_LEN+1]; // temporary variable to hold the name that we scan from the line variable.
@@ -243,6 +243,8 @@ int main(int argc, char *argv[]) {
 		}
 		else if ( pid == 0 ) {
 			// printf("The file we are trying to open in the child is %s\n", argv[fileNum]);
+			//
+			HashSet *set = create_hash_set();
 
 			close (countPipe[0]); // close read end of pipe.
 
@@ -276,7 +278,11 @@ int main(int argc, char *argv[]) {
 
 			//  displayResults(set);
 			// write the data back to the pipe here.
-			write(countPipe[1], set, sizeof(set));
+			printf("%p is the address of the set in child: %d, the size of hashset is: %lu, and SzOf entries is: %lu\n", 
+					set, getpid(), sizeof(set), sizeof(set->entries));
+
+			
+			write(countPipe[1], set->entries, sizeof(set->entries));
 			// freeSet(set); // we can read the set into memory in the parent process, but if we free the memory here,
 			// we will get a segfault.
 			fclose(nameFile);
@@ -291,17 +297,27 @@ int main(int argc, char *argv[]) {
 
 		close(countPipe[1]); // close write end of pipe.
 
-		HashSet *childResult;
+		// HashSet *childResult = malloc(sizeof(HashSet));
+		NameEntry results[MAX_NAMES];
 
 		for (int i = 1; i < argc; i++) {
 			if (wait(NULL) < 0 ) {
 				continue;
 			}
-			read(countPipe[0], childResult, sizeof(childResult));
+			read(countPipe[0], &results, sizeof(results));		
 			printf("Results from Child %d:\n", i);
-			displayResults(childResult);
-			freeSet(childResult);
+//			printf("Address of read %p\n:", childResult);
+//			displayResults(childResult);
+			// freeSet(childResult);
+			for ( int i = 0; i < MAX_NAMES; i++ ){
+				if ( results[i].value != 0 ) {
+					printf("%s - %d\n", results[i].key, results[i].value);
+				}
+			}
+			printf("Finished one loop\n");
 		}		
+
+		close(countPipe[0]);
 
 		return 0;
 
