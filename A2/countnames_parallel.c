@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
 
 			//  displayResults(set);
 			// write the data back to the pipe here.
-			write(countPipe[1], &set, sizeof(set));
+			write(countPipe[1], set, sizeof(set));
 			// freeSet(set); // we can read the set into memory in the parent process, but if we free the memory here,
 			// we will get a segfault.
 			fclose(nameFile);
@@ -294,7 +294,9 @@ int main(int argc, char *argv[]) {
 		HashSet *childResult;
 
 		for (int i = 1; i < argc; i++) {
-			wait(NULL);
+			if (wait(NULL) < 0 ) {
+				continue;
+			}
 			read(countPipe[0], childResult, sizeof(childResult));
 			printf("Results from Child %d:\n", i);
 			displayResults(childResult);
