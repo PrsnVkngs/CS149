@@ -85,48 +85,48 @@ HashSet *create_hash_set() {
 
 
 /*
- * The put function takes in an address to a HashSet, and a name, then hashes the name and inserts it
- * into the map. It uses linear collision detection/resolution.
- * Assumes: That set and name are valid pointers.
- * No return value.
+ * the put function takes in an address to a hashset, and a name, then hashes the name and inserts it
+ * into the map. it uses linear collision detection/resolution.
+ * assumes: that set and name are valid pointers.
+ * no return value.
  * */
-void put(HashSet *set, char *name) {
+void put_inc(HashSet *set, char *name) {
 
 	unsigned int index = hash_name(name);
 	
-	NameEntry *currentName = &set->entries[index];
+	NameEntry *currentname = &set->entries[index];
 
-//	printf("The value associate with the name: %s at index %d is %d\n", currentName->key, index, currentName->value);
-	if ( currentName->value == 0 ) {
-		strcpy(currentName->key, name);
-		currentName->value=1;
-		currentName->next = NULL;
+//	printf("the value associate with the name: %s at index %d is %d\n", currentname->key, index, currentname->value);
+	if ( currentname->value == 0 ) {
+		strcpy(currentname->key, name);
+		currentname->value=1;
+		currentname->next = NULL;
 		return;
 	}
 
 	while (true) {
 
-		if (strcmp(currentName->key, name) == 0) {
-			currentName->value+=1;
+		if (strcmp(currentname->key, name) == 0) {
+			currentname->value+=1;
 			return;
 		}
 		
-		if ( currentName->next == NULL ) {
+		if ( currentname->next == NULL ) {
 			break;
 		}
-		currentName = currentName->next;
+		currentname = currentname->next;
 
 	}
 
-	// printf("Collision occurred for %s, creating bucket at %d\n", name, index);
+	// printf("collision occurred for %s, creating bucket at %d\n", name, index);
 
-	NameEntry *newEntry = calloc(1, sizeof(NameEntry));
+	NameEntry *newentry = calloc(1, sizeof(NameEntry));
 
-	newEntry->value = 1;
-	strcpy(newEntry->key, name);
-	newEntry->next = NULL;
+	newentry->value = 1;
+	strcpy(newentry->key, name);
+	newentry->next = NULL;
 
-	currentName->next = newEntry;
+	currentname->next = newentry;
 
 	return;
 
@@ -142,6 +142,54 @@ void put(HashSet *set, char *name) {
 
 	strcpy(set->entries[index].key, name);
 	set->entries[index].value+=1; */ // old code for preservation purpose.
+}
+
+
+/*
+ * Overloaded version of the put function takes in an address to a hashset, and a name, and a value to add then hashes the name and inserts it
+ * into the map. it uses linear collision detection/resolution.
+ * assumes: that set and name are valid pointers.
+ * no return value.
+ * */
+void put_val(HashSet *set, char *name, int value) {
+
+	unsigned int index = hash_name(name);
+	
+	NameEntry *currentname = &set->entries[index];
+
+//	printf("the value associate with the name: %s at index %d is %d\n", currentname->key, index, currentname->value);
+	if ( currentname->value == 0 ) {
+		strcpy(currentname->key, name);
+		currentname->value=value;
+		currentname->next = NULL;
+		return;
+	}
+
+	while (true) {
+
+		if (strcmp(currentname->key, name) == 0) {
+			currentname->value+=value;
+			return;
+		}
+		
+		if ( currentname->next == NULL ) {
+			break;
+		}
+		currentname = currentname->next;
+
+	}
+
+	// printf("collision occurred for %s, creating bucket at %d\n", name, index);
+
+	NameEntry *newentry = calloc(1, sizeof(NameEntry));
+
+	newentry->value = value;
+	strcpy(newentry->key, name);
+	newentry->next = NULL;
+
+	currentname->next = newentry;
+
+	return;
 }
 
 /*
@@ -189,6 +237,25 @@ void freeSet(HashSet *set) {
 	printf("freed buckets\n");	
 	free(set->entries);
 	free(set);
+
+}
+/*
+ * This function takes in a HashSet pointer, as well as an array of data values to 
+ * take in and aggregate into the set. Then it goes through the array and adds it to the hashset. 
+ *
+ */
+void aggregateSet(HashSet *result, NameEntry data[]) {
+
+	NameEntry *nullptr = NULL;
+
+	NameEntry current;
+	for (int i = 0; i < MAX_NAMES; i++) {
+		current = data[i];
+		while ( &current != nullptr && current.value != 0 ) {	
+			put_val(result, current.key, current.value);
+			current = *current.next;
+		}
+	}
 
 }
 
@@ -267,7 +334,7 @@ int main(int argc, char *argv[]) {
 
 				if ( sscanf(line, "%30[^\n]", name) == 1 ) {
 
-					put(set, name);
+					put_inc(set, name);
 
 				}
 				else {
@@ -278,12 +345,12 @@ int main(int argc, char *argv[]) {
 
 			//  displayResults(set);
 			// write the data back to the pipe here.
-			printf("%p is the address of the set in child: %d, the size of hashset is: %lu, and SzOf entries is: %lu\n", 
-					set, getpid(), sizeof(set), sizeof(set->entries));
+			// printf("%p is the address of the set in child: %d, the size of hashset is: %lu, and SzOf entries is: %lu\n", 
+					// set, getpid(), sizeof(set), sizeof(set->entries));
 
 			
 			write(countPipe[1], set->entries, sizeof(set->entries));
-			// freeSet(set); // we can read the set into memory in the parent process, but if we free the memory here,
+			freeSet(set); // we can read the set into memory in the parent process, but if we free the memory here,
 			// we will get a segfault.
 			fclose(nameFile);
 			close(countPipe[1]);
@@ -296,26 +363,31 @@ int main(int argc, char *argv[]) {
 	if ( pid != 0 ) {
 
 		close(countPipe[1]); // close write end of pipe.
+				     
+		HashSet *results = create_hash_set();
 
 		// HashSet *childResult = malloc(sizeof(HashSet));
-		NameEntry results[MAX_NAMES];
+		NameEntry child_results[MAX_NAMES];
 
 		for (int i = 1; i < argc; i++) {
 			if (wait(NULL) < 0 ) {
 				continue;
 			}
-			read(countPipe[0], &results, sizeof(results));		
-			printf("Results from Child %d:\n", i);
-//			printf("Address of read %p\n:", childResult);
-//			displayResults(childResult);
-			// freeSet(childResult);
-			for ( int i = 0; i < MAX_NAMES; i++ ){
-				if ( results[i].value != 0 ) {
-					printf("%s - %d\n", results[i].key, results[i].value);
+			read(countPipe[0], &child_results, sizeof(child_results));
+			printf("successfully read in data from pipe\n");
+			for (int i = 0; i < MAX_NAMES; i++) {
+				if (child_results[i].value != 0) {
+					printf("%s - %d\n", child_results[i].key, child_results[i].value);
 				}
 			}
-			printf("Finished one loop\n");
-		}		
+			// aggregateSet(results, child_results);
+
+			printf("Finished %d loop(s)\n", i);
+		}
+
+		displayResults(results);
+
+		// freeSet(results);	
 
 		close(countPipe[0]);
 
