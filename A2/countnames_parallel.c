@@ -219,7 +219,7 @@ void displayResults(HashSet *set) {
  * including the memory given to its entries.
  * Assumption: The hashset pointer given is valid and is not a null pointer.
  * */
-void freeSet(HashSet *set) {
+void freeSetChild(HashSet *set) {
 
 	NameEntry *nullptr = NULL;
 
@@ -227,6 +227,7 @@ void freeSet(HashSet *set) {
 	NameEntry *next;
 	for (int i = 0; i < MAX_NAMES; i++) {
 		curr = &set->entries[i];
+		
 		while (curr != nullptr || curr->value != 0) {
 			next = curr -> next;
 			//printf("about to free memory address: %p | in a bucket at index: %d - name here is: %s\n", curr, i, curr->key);
@@ -239,6 +240,39 @@ void freeSet(HashSet *set) {
 	free(set);
 
 }
+
+/**
+ * This function is a shortcut function that frees the memory allocated to the HashSet 
+ * including the memory given to its entries.
+ * Assumption: The hashset pointer given is valid and is not a null pointer.
+ * */
+void freeSet(HashSet *set) {
+
+	NameEntry *nullptr = NULL;
+
+	NameEntry *curr;
+	NameEntry *next;
+	for (int i = 0; i < MAX_NAMES; i++) {
+		curr = &set->entries[i];
+		if ( curr->next == nullptr ) {
+			continue;
+		}
+		else {
+			curr = curr->next;
+		}
+		while (curr != nullptr || curr->value != 0) {
+			next = curr -> next;
+			//printf("about to free memory address: %p | in a bucket at index: %d - name here is: %s\n", curr, i, curr->key);
+			free (curr);
+			curr = next;
+		}
+	}
+	printf("freed buckets\n");	
+	free(set->entries);
+	free(set);
+
+}
+
 /*
  * This function takes in a HashSet pointer, as well as an array of data values to 
  * take in and aggregate into the set. Then it goes through the array and adds it to the hashset. 
@@ -246,13 +280,16 @@ void freeSet(HashSet *set) {
  */
 void aggregateSet(HashSet *result, NameEntry data[]) {
 
-	NameEntry *nullptr = NULL;
+	// NameEntry *nullptr = NULL;
 
 	NameEntry current;
 	for (int i = 0; i < MAX_NAMES; i++) {
 		current = data[i];
-		while ( &current != nullptr && current.value != 0 ) {	
+		while ( /*&current != nullptr &&*/ current.value != 0 ) {	
 			put_val(result, current.key, current.value);
+			if ( current.next == NULL ) {
+				break;
+			}
 			current = *current.next;
 		}
 	}
@@ -350,7 +387,7 @@ int main(int argc, char *argv[]) {
 
 			
 			write(countPipe[1], set->entries, sizeof(set->entries));
-			freeSet(set); // we can read the set into memory in the parent process, but if we free the memory here,
+			freeSetChild(set); // we can read the set into memory in the parent process, but if we free the memory here,
 			// we will get a segfault.
 			fclose(nameFile);
 			close(countPipe[1]);
@@ -374,13 +411,13 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			read(countPipe[0], &child_results, sizeof(child_results));
-			printf("successfully read in data from pipe\n");
+			/* printf("successfully read in data from pipe\n");
 			for (int i = 0; i < MAX_NAMES; i++) {
 				if (child_results[i].value != 0) {
 					printf("%s - %d\n", child_results[i].key, child_results[i].value);
 				}
-			}
-			// aggregateSet(results, child_results);
+			} */
+			aggregateSet(results, child_results);
 
 			printf("Finished %d loop(s)\n", i);
 		}
