@@ -1,0 +1,12 @@
+  284  cat end.txt 
+  285  pwd
+  286  cd ~/Dokument/CS149/WS7
+  287  ls | wc
+  288  ls | sort
+  289  ls | sort | wc
+  290  ls -latr /bin/
+  291  cat a.out | more
+  292  strace ls
+  293  du -sh
+  294  df -i
+  295  history > worksheet7.log
