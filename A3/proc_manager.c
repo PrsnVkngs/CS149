@@ -18,7 +18,9 @@ int main(void) {
 	// char* command = (char *) malloc(LINE_LENGTH * sizeof(char)); 
 	char command[LINE_LENGTH];
 	// char** argv = (char **) malloc(MAX_PARAMS * sizeof(char *)); // assume max 4 parameters 
-	char argv[MAX_PARAMS+1][LINE_LENGTH];	
+	// char argv[MAX_PARAMS+1][LINE_LENGTH];
+	char* argv[MAX_PARAMS+1];
+	char* nullptr = NULL;	
 	int argc;
 	int pid;
 	int commandNo = 1;
@@ -30,6 +32,7 @@ int main(void) {
 	while(fgets(buffer, LINE_LENGTH*2, stdin) != NULL) {
 
 		strncpy(input, buffer, LINE_LENGTH);
+
 		argc = 0;
 		temp = strtok(input, " ");
 		strcpy(command, temp);
@@ -38,12 +41,15 @@ int main(void) {
 
 		while(temp != NULL && argc < MAX_PARAMS) {
 
-			strcpy(argv[argc++], temp);
+			// strcpy(argv[argc++], temp);
+			temp[strcspn(temp, "\n")] = '\0';
+			argv[argc++] = temp;
 			temp = strtok(NULL, " ");
 
 		}
 
-		strcpy(argv[argc], "NULL");
+		// strcpy(argv[argc], "NULL");
+		argv[argc] = NULL;
 
 		pid = fork();
 
@@ -72,17 +78,39 @@ int main(void) {
 
 			if (dup2(out_fd, STDOUT_FILENO) < 0 || dup2(err_fd, STDERR_FILENO) < 0) {
 				perror("Dup2 file descriptor replacement failed.");
+				exit(EXIT_FAILURE);
 			}
 			// close(out_fd);
 			// close(err_fd);
-			
-			char* arguments[] = {argv[0], argv[1], argv[2], argv[3], argv[4] };
+			/*
+			char* arguments[MAX_PARAMS+1];
+			int c = 0;
+			while ( c < MAX_PARAMS ) {
+				if ( argv[c] == NULL || argv[c] == nullptr ) {
+					arguments[c] = nullptr;
+					break;
+				}
+
+				arguments[c] = argv[c];
+
+			}
+			*/
+
+			printf("Params recieved:\n");
+			for(int i = 0; i < MAX_PARAMS; i++) {
+				printf("p%d: strval = %s ; ptrval = %p\n", i, argv[i], argv[i]);
+				if( argv[i] == NULL ){
+					break;
+				}
+			}
 
 			printf("Starting command %d: child %d of parent %d\n", commandNo, getpid(), getppid());
-			int exec_result = execvp(command, arguments);
+			int exec_result = execvp(command, argv);
 
 			fprintf(stderr, "execvp in child %d failed with error code %d\n", getpid(), exec_result);
 
+			close(out_fd);
+			close(err_fd);
 			exit(EXIT_FAILURE);
 
 
@@ -97,6 +125,11 @@ int main(void) {
 		}
 		*/
 
+	}
+
+	int childPID;
+	while((childPID = wait(NULL)) < 0) {
+		printf("%d", childPID);
 	}
 
 	/*
