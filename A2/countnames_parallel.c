@@ -268,7 +268,7 @@ void freeSet(HashSet *set) {
 		}
 	}
 	printf("freed buckets\n");	
-	free(set->entries);
+	// free(set->entries);
 	free(set);
 
 }
@@ -401,9 +401,9 @@ int main(int argc, char *argv[]) {
 
 		close(countPipe[1]); // close write end of pipe.
 				     
-		HashSet *results = create_hash_set();
+		// HashSet *results = create_hash_set();
 
-		// HashSet *childResult = malloc(sizeof(HashSet));
+		HashSet *results = malloc(sizeof(HashSet));
 		NameEntry child_results[MAX_NAMES];
 
 		for (int i = 1; i < argc; i++) {
@@ -424,7 +424,7 @@ int main(int argc, char *argv[]) {
 
 		displayResults(results);
 
-		// freeSet(results);	
+		freeSet(results);	
 
 		close(countPipe[0]);
 
