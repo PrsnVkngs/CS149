@@ -36,6 +36,7 @@ int main(void) {
 		argc = 0;
 		temp = strtok(input, " ");
 		strcpy(command, temp);
+		command[strcspn(command, "\n")] = '\0';
 
 		printf("temp = %s\n", temp);
 
@@ -128,8 +129,8 @@ int main(void) {
 	}
 
 	int childPID;
-	while((childPID = wait(NULL)) < 0) {
-		printf("%d", childPID);
+	while((childPID = wait(NULL)) > 0) {
+		printf("%d, ", childPID);
 	}
 
 	/*
@@ -144,5 +145,16 @@ int main(void) {
 	*/
 
 	return 0;
+
+}
+
+int quickWrite(char* filename, char* data) {
+
+	FILE* fp = fopen(filename, "w");
+
+	if (fp == NULL) {
+		perror("file opening failed.\n");
+		return 1;
+	}
 
 }
