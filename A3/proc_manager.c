@@ -10,6 +10,8 @@
 #define MAX_PARAMS 4
 #define LINE_COUNT 100
 
+int quickWrite(char* filename, char* data);
+
 int main(void) {
 
 	char buffer[LINE_LENGTH*2];
@@ -95,7 +97,7 @@ int main(void) {
 				arguments[c] = argv[c];
 
 			}
-			*/
+		
 
 			printf("Params recieved:\n");
 			for(int i = 0; i < MAX_PARAMS; i++) {
@@ -104,6 +106,7 @@ int main(void) {
 					break;
 				}
 			}
+			*/
 
 			printf("Starting command %d: child %d of parent %d\n", commandNo, getpid(), getppid());
 			int exec_result = execvp(command, argv);
@@ -129,8 +132,22 @@ int main(void) {
 	}
 
 	int childPID;
-	while((childPID = wait(NULL)) > 0) {
-		printf("%d, ", childPID);
+	int status;
+	char write_file[20];
+	char message[50];
+	while((childPID = wait(&status)) > 0) {
+		// printf("%d, ", childPID);
+		sprintf(write_file, "%d.err", childPID);
+		if (status == 0) {
+			sprintf(message, "Exited with exitcode = %d", status);
+		}
+		else if(status == 15 || status == 9 || status == 2 || status == 3) {
+			sprintf(message, "Process was killed with code: %d", status);
+		}
+		quickWrite(write_file, message);
+		sprintf(write_file, "%d.out", childPID);
+		sprintf(message, "Finished child %d pid of parent %d", childPID, getpid());
+		quickWrite(write_file, message);
 	}
 
 	/*
@@ -150,11 +167,17 @@ int main(void) {
 
 int quickWrite(char* filename, char* data) {
 
-	FILE* fp = fopen(filename, "w");
+	FILE* fp = fopen(filename, "a");
 
 	if (fp == NULL) {
 		perror("file opening failed.\n");
 		return 1;
 	}
+
+	fputs(data, fp);
+	fputs("\n", fp);
+	fclose(fp);
+
+	return 0;
 
 }
