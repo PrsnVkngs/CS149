@@ -1,0 +1,9 @@
+  444  gcc -ansi -I../apue.3e/include -DLINUX -D_GNU_SOURCE -Wall -o run sigusr.c -L../apue.3e/lib -lapue
+  445  ./run 
+  446  ./run &
+  447  ps aux
+  448  kill -SIGUSR1 45605
+  449  kill -SIGUSR2 45605
+  450  kill -SIGCONT 45605
+  451  kill -9 45605
+  452  history > ws9.log
