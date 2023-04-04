@@ -1,10 +1,10 @@
-#ifndef LINKED_LIST.H
-#define LINKED_LIST.H
+#ifndef LINKED_LIST_H 
+#define LINKED_LIST_H 
 
-typedef struct {
+typedef struct LinkNode {
 
 	char* data;
-	LinkNode* next;
+	struct LinkNode* next;
 
 } LinkNode;
 
@@ -21,4 +21,4 @@ void insert(Header* head, char* line);
 void displayList(Header* head);
 void freeList(Header* head);
 
-#endif
+#endif 

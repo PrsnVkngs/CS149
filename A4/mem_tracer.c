@@ -1,31 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "commands.h"
+#include "linked_list.h"
 
 #define LINE_LEN 1024 //give 1KB of memory for a line, the line will undoubtedly be shorter, but just in case...
-
-typedef struct {
-	char** data; // this element is private, however, since we can't declare things as private, we just have to be honorable about not accessing this variable.
-	int size;
-	int capacity;
-} Commands;
-
-void add(Commands* c, char* newEntry) {
-
-	if ( c->size == myStruct->capacity) {
-		c->capacity *= 2;
-		c->data = realloc(c->data, c->capacity * sizeof(char*));
-	}
-	c->data[c->size] = newEntry;
-	c->size++;
-
-}
-
 
 int main() {
 
 	char buffer[LINE_LEN];
 
+	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
+	Header* list_head = init();
 
+	// code goes here
+
+	while (fgets(buffer, LINE_LEN, stdin) != NULL) {
+
+		buffer[strcspn(buffer, "\n")] = '\0';
+
+		add(com_arr, buffer);
+
+		insert(list_head, buffer);
+
+	}
+
+	displayCommands(com_arr);
+	displayList(list_head);
+
+	// code ends here
+	
+	freeCom(com_arr); // free up the memory given by makeCommands()
+	freeList(list_head); // free up the memory given to our linked list.
 
 	return 0; // program executed completely and successfully.
 
