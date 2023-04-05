@@ -16,7 +16,7 @@ typedef struct {
 
 } Header;
 
-Header* init();
+Header* initHead();
 void insert(Header* head, char* line);
 void displayList(Header* head);
 void freeList(Header* head);

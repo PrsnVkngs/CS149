@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "myfunctions.h"
 #include "commands.h"
 #include "linked_list.h"
 
@@ -11,8 +12,11 @@ int main() {
 
 	char buffer[LINE_LEN];
 
+	init_memtrace();
+	atexit(close_memtrace);
+
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
-	Header* list_head = init();
+	Header* list_head = initHead();
 
 	// code goes here
 
@@ -33,6 +37,8 @@ int main() {
 	
 	freeCom(com_arr); // free up the memory given by makeCommands()
 	freeList(list_head); // free up the memory given to our linked list.
+	com_arr = NULL;
+	list_head = NULL;
 
 	return 0; // program executed completely and successfully.
 

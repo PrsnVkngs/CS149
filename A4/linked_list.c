@@ -1,9 +1,11 @@
-#include "linked_list.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-Header* init() {
+#include "linked_list.h"
+#include "myfunctions.h"
+
+Header* initHead() {
 
 	Header* newHead = (Header*)malloc(sizeof(Header));
 	newHead -> size = 0;
@@ -16,7 +18,7 @@ Header* init() {
 void insert(Header* head, char* line) {
 
 	LinkNode* newLink = (LinkNode*)malloc(sizeof(LinkNode));
-	newLink -> data = (char*)malloc(sizeof(char) * strlen(line));
+	newLink -> data = (char*)malloc(sizeof(char) * strlen(line) + 1);
 	strcpy(newLink->data, line);
 	newLink -> next = NULL;
 

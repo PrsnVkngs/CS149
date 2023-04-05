@@ -1,7 +1,9 @@
-#include "commands.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "commands.h"
+#include "myfunctions.h"
 
 Commands* makeCommands() {
 
@@ -22,7 +24,7 @@ void add(Commands* c, char* newEntry) {
 		c->capacity *= 1.5;
 		c->data = (char**)realloc(c->data, c->capacity * sizeof(char*));
 	}
-	c->data[c->size] = (char*)malloc(strlen(newEntry) * sizeof(char));
+	c->data[c->size] = (char*)malloc(strlen(newEntry) * sizeof(char) + 1);
 	strcpy(c->data[c->size], newEntry);
 	c->size++;
 
@@ -42,6 +44,7 @@ void freeCom(Commands* c) {
 	for (int i = 0; i < c->capacity; i++) { // TODO this might throw an error when testing, depending on add implementation.
 		free(c->data[i]);
 	}
+	free(c->data);
 	free(c);
 
 }

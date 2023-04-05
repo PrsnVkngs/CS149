@@ -3,7 +3,7 @@
 
 #include "myfunctions.h"
 
-memtrace_file = NULL;
+FILE* memtrace_file = NULL;
 
 void init_memtrace() {
 
@@ -17,11 +17,34 @@ void init_memtrace() {
 
 void* MALLOC(int size, char* file, int line, const char *func) {
 
-	void* p; 
+	void* p = malloc(size);
+	fprintf(memtrace_file, "File %s, line %d, function %s allocated new memory segment at address %p to size %d\n", file, line, func, p, size);
+	return p;
+
 }
 
 void* REALLOC(void* p, int size, char* file, int line, const char *func) {
+
+	void* new_p = realloc(p, size);
+	fprintf(memtrace_file, "File %s, line %d, function %s reallocated new memory segment at address %p to new size %d\n", file, line, func, p, size);
+	return new_p;
+
 }
 
-void* FREE(int size, char* file, int line, const char *func) {
+void FREE(void* p, char* file, int line, const char *func) {
+
+	fprintf(memtrace_file, "File %s, line %d, function %s deallocated memory segment at address %p\n", file, line, func, p);
+	free(p);
+
+
 }
+
+void close_memtrace() {
+
+	fclose(memtrace_file);
+
+}
+
+#define malloc(t) MALLOC(t __FILE__, __LINE__, __func__)
+#define realloc(p, t) REALLOC(p, t, __FILE__, __LINE__, __func__)
+#define free(p) FREE(p, __FILE__, __LINE__, __func__)
