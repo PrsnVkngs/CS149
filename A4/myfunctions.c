@@ -19,6 +19,7 @@ void* MALLOC(int size, char* file, int line, const char *func) {
 
 	void* p = malloc(size);
 	fprintf(memtrace_file, "File %s, line %d, function %s allocated new memory segment at address %p to size %d\n", file, line, func, p, size);
+	fprintf(stderr, "File %s, line %d, function %s allocated mem at %p of size %d\n", file, line, func, p, size);
 	return p;
 
 }
@@ -26,7 +27,8 @@ void* MALLOC(int size, char* file, int line, const char *func) {
 void* REALLOC(void* p, int size, char* file, int line, const char *func) {
 
 	void* new_p = realloc(p, size);
-	fprintf(memtrace_file, "File %s, line %d, function %s reallocated new memory segment at address %p to new size %d\n", file, line, func, p, size);
+	fprintf(memtrace_file, "File %s, line %d, function %s reallocated new memory segment at address %p to new size %d\n", file, line, func, new_p, size);
+	fprintf(stderr, "File %s, line %d, function %s reallocated memory at %p size %d\n", file, line, func, new_p, size);
 	return new_p;
 
 }
@@ -35,7 +37,7 @@ void FREE(void* p, char* file, int line, const char *func) {
 
 	fprintf(memtrace_file, "File %s, line %d, function %s deallocated memory segment at address %p\n", file, line, func, p);
 	free(p);
-
+	fprintf(stderr, "Freed memory from function %s, at line %d\n", func, line);
 
 }
 

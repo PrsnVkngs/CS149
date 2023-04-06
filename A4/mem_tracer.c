@@ -12,8 +12,7 @@ int main() {
 
 	char buffer[LINE_LEN];
 
-	init_memtrace();
-	atexit(close_memtrace);
+	init_memtrace();	
 
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
 	Header* list_head = initHead();
@@ -39,6 +38,7 @@ int main() {
 	freeList(list_head); // free up the memory given to our linked list.
 	com_arr = NULL;
 	list_head = NULL;
+	close_memtrace();
 
 	return 0; // program executed completely and successfully.
 
