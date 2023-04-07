@@ -7,7 +7,9 @@
 
 Commands* makeCommands() {
 
+	printf("Function was called\n");
 	Commands* com = (Commands*)malloc(sizeof(Commands));
+	printf("Allocated memory for the object.\n");
 	com -> size = 0;
 	com -> capacity = 10;
 	com -> data = (char**)malloc(sizeof(char*) * com->capacity);

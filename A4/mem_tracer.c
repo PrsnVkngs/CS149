@@ -12,10 +12,16 @@ int main() {
 
 	char buffer[LINE_LEN];
 
-	init_memtrace();	
+	printf("Initialized input buffer.\n");
+
+	init_memtrace();
+
+	printf("Initialized memtrace %p.\n", memtrace_file);
 
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
+	printf("Initialized commands array.\n");
 	Header* list_head = initHead();
+	printf("Initialized linked list\n");
 
 	// code goes here
 

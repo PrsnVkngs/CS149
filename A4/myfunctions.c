@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "myfunctions.h"
 
@@ -8,6 +9,7 @@ FILE* memtrace_file = NULL;
 void init_memtrace() {
 
 	memtrace_file = fopen("memtrace.out", "w");
+	printf("memtrace file = %p\n", memtrace_file);
 	if (!memtrace_file) {
 		fprintf(stderr, "File memtrace.out was not able to be opened for writing.\n");
 		exit(EXIT_FAILURE);
@@ -15,11 +17,12 @@ void init_memtrace() {
 
 }
 
-void* MALLOC(int size, char* file, int line, const char *func) {
+void* MALLOC(int size, char* file, int line) {
 
 	void* p = malloc(size);
-	fprintf(memtrace_file, "File %s, line %d, function %s allocated new memory segment at address %p to size %d\n", file, line, func, p, size);
-	fprintf(stderr, "File %s, line %d, function %s allocated mem at %p of size %d\n", file, line, func, p, size);
+	printf("Allocated memory for the new pointer\n");
+	fprintf(memtrace_file, "File %s, line %d, allocated new memory segment at address %p to size %d\n", file, line, p, size);
+	fprintf(stderr, "File %s, line %d allocated mem at %p of size %d\n", file, line, p, size);
 	return p;
 
 }
@@ -47,6 +50,12 @@ void close_memtrace() {
 
 }
 
-#define malloc(t) MALLOC(t __FILE__, __LINE__, __func__)
-#define realloc(p, t) REALLOC(p, t, __FILE__, __LINE__, __func__)
+#undef malloc
+#define malloc(size) MALLOC(size, __FILE__, __LINE__, __func__)
+
+#undef realloc
+#define realloc(p, size) REALLOC(p, size, __FILE__, __LINE__, __func__)
+
+#undef free
 #define free(p) FREE(p, __FILE__, __LINE__, __func__)
+
