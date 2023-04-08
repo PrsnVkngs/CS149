@@ -19,28 +19,38 @@ void init_memtrace() {
 
 void* MALLOC(int size, char* file, int line) {
 
-	void* p = malloc(size);
+#undef malloc
+	printf("Entered malloc\n");
+	void* p = stdmalloc(size);
 	printf("Allocated memory for the new pointer\n");
 	fprintf(memtrace_file, "File %s, line %d, allocated new memory segment at address %p to size %d\n", file, line, p, size);
 	fprintf(stderr, "File %s, line %d allocated mem at %p of size %d\n", file, line, p, size);
+
+#define malloc(size) MALLOC(size, __FILE__, __LINE__)
 	return p;
 
 }
 
-void* REALLOC(void* p, int size, char* file, int line, const char *func) {
+void* REALLOC(void* p, int size, char* file, int line) {
 
-	void* new_p = realloc(p, size);
-	fprintf(memtrace_file, "File %s, line %d, function %s reallocated new memory segment at address %p to new size %d\n", file, line, func, new_p, size);
-	fprintf(stderr, "File %s, line %d, function %s reallocated memory at %p size %d\n", file, line, func, new_p, size);
+#undef realloc
+	void* new_p = stdrealloc(p, size);
+	fprintf(memtrace_file, "File %s, line %d, reallocated new memory segment at address %p to new size %d\n", file, line, new_p, size);
+	fprintf(stderr, "File %s, line %d, reallocated memory at %p size %d\n", file, line, new_p, size);
+
+#define realloc(p, t) REALLOC(p, t, __FILE__, __LINE__)
 	return new_p;
 
 }
 
-void FREE(void* p, char* file, int line, const char *func) {
+void FREE(void* p, char* file, int line) {
+#undef free
 
-	fprintf(memtrace_file, "File %s, line %d, function %s deallocated memory segment at address %p\n", file, line, func, p);
-	free(p);
-	fprintf(stderr, "Freed memory from function %s, at line %d\n", func, line);
+	fprintf(memtrace_file, "File %s, line %d deallocated memory segment at address %p\n", file, line, p);
+	stdfree(p);
+	fprintf(stderr, "Freed memory at line %d\n", line);
+
+#define free(p) FREE(p, __FILE__, __LINE__)
 
 }
 
@@ -50,12 +60,12 @@ void close_memtrace() {
 
 }
 
-#undef malloc
-#define malloc(size) MALLOC(size, __FILE__, __LINE__, __func__)
+// #undef malloc
+// #define malloc(size) MALLOC(size, __FILE__, __LINE__, __func__)
 
-#undef realloc
-#define realloc(p, size) REALLOC(p, size, __FILE__, __LINE__, __func__)
+// #undef realloc
+// #define realloc(p, size) REALLOC(p, size, __FILE__, __LINE__, __func__)
 
-#undef free
-#define free(p) FREE(p, __FILE__, __LINE__, __func__)
+// #undef free
+// #define free(p) FREE(p, __FILE__, __LINE__, __func__)
 

@@ -16,7 +16,7 @@ int main() {
 
 	init_memtrace();
 
-	printf("Initialized memtrace %p.\n", memtrace_file);
+	printf("Initialized memtrace.\n");
 
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
 	printf("Initialized commands array.\n");

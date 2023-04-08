@@ -10,7 +10,7 @@ Stack* initStack() {
 	Stack* newStack = (Stack*) malloc( sizeof(Stack) );
 	newStack-> size = 10; // hold enough for 10 functions for now.
 	newStack-> top = 0; // new stack so top of it is the bottom.
-	newStack-> stack = (char**) malloc ( sizeof(char*) * newStack->size ); // allocate memory for the stack.
+	newStack-> stack = (char**) malloc( sizeof(char*) * newStack->size ); // allocate memory for the stack.
 
 	return newStack;
 
@@ -19,10 +19,10 @@ Stack* initStack() {
 void pushStack(Stack* s, char* function) {
 
 	if ( s->top == s->size ) {
-		s->stack = (char**) realloc (s->stack, (s->size+10) * sizeof(char*) );
+		s->stack = (char**) realloc(s->stack, (s->size+10) * sizeof(char*) );
 	}
 
-	s->stack[s->top] = (char*) malloc ( sizeof(char) * strlen(function) + 1 );
+	s->stack[s->top] = (char*) malloc( sizeof(char) * strlen(function) + 1 );
 	strcpy(s->stack[s->top], function);
 	s->top++;
 }
