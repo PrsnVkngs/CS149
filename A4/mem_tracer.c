@@ -19,9 +19,9 @@ int main() {
 	printf("Initialized memtrace.\n");
 
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
-	printf("Initialized commands array.\n");
+	// printf("Initialized commands array.\n");
 	Header* list_head = initHead();
-	printf("Initialized linked list\n");
+	// printf("Initialized linked list\n");
 
 	// code goes here
 

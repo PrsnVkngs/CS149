@@ -10,7 +10,9 @@ typedef struct {
 } Stack;
 
 Stack* initStack();
-void pushStack(Stack* s, char* function);
+Stack* getStack();
+void makeStack();
+void pushStack(Stack* s, const char* function);
 void popStack(Stack* s);
 void displayStack(Stack* s);
 void freeStack(Stack* s);
