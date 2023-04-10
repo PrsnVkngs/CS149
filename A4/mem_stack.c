@@ -28,9 +28,10 @@ Stack* initStack() {
 
 void pushStack(char* function) {
 
-	if ( s->top == s->size ) {
+	if ( s->top >= s->size ) {
 		fprintf(stderr, "Stack too big\n");
 		s->stack = (char**) realloc(s->stack, (s->size+10) * sizeof(char*) );
+		s->size+=10;
 	}
 
 	fprintf(stderr, "Making a new stack item\n");

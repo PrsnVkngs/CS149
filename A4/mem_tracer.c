@@ -38,7 +38,6 @@ int main() {
 
 	}
 
-	displayStack();
 	displayCommands(com_arr);
 	displayList(list_head);
 
@@ -46,6 +45,7 @@ int main() {
 	
 	freeCom(com_arr); // free up the memory given by makeCommands()
 	freeList(list_head); // free up the memory given to our linked list.
+	displayStack();
 	freeStack();
 	com_arr = NULL;
 	list_head = NULL;
