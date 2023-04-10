@@ -43,7 +43,7 @@ void displayList(Header* head) {
 	int i = 0;
 	while(current != NULL) {
 		printf("Link %d - Data in link: %s\n", i++, current->data);
-		printf("next link = %p\n", current->next);
+		// printf("next link = %p\n", current->next);
 		current = current->next;
 	}
 

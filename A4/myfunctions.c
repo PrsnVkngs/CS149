@@ -9,7 +9,7 @@ FILE* memtrace_file = NULL;
 void init_memtrace() {
 
 	memtrace_file = fopen("memtrace.out", "w");
-	printf("memtrace file = %p\n", memtrace_file);
+	// printf("memtrace file = %p\n", memtrace_file);
 	if (!memtrace_file) {
 		fprintf(stderr, "File memtrace.out was not able to be opened for writing.\n");
 		exit(EXIT_FAILURE);

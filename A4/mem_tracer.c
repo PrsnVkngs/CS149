@@ -13,12 +13,12 @@ int main() {
 
 	char buffer[LINE_LEN];
 
-	printf("Initialized input buffer.\n");
+	// printf("Initialized input buffer.\n");
 
 	init_memtrace();
 	initStack();
 
-	printf("Initialized memtrace.\n");
+	// printf("Initialized memtrace.\n");
 
 	pushStack("main");
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
