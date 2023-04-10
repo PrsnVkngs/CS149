@@ -43,7 +43,7 @@ void displayCommands(Commands* c) {
 // This function assumes that the passed in Commands struct has been initialized and is not an invalid pointer.
 void freeCom(Commands* c) {
 
-	for (int i = 0; i < c->capacity; i++) { // TODO this might throw an error when testing, depending on add implementation.
+	for (int i = 0; i < c->size; i++) { // TODO this might throw an error when testing, depending on add implementation.
 		free(c->data[i]);
 	}
 	free(c->data);

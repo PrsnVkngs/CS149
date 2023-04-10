@@ -11,10 +11,9 @@ typedef struct {
 
 Stack* initStack();
 Stack* getStack();
-void makeStack();
-void pushStack(Stack* s, const char* function);
-void popStack(Stack* s);
-void displayStack(Stack* s);
-void freeStack(Stack* s);
+void pushStack(char* function);
+void popStack();
+void displayStack();
+void freeStack();
 
 #endif

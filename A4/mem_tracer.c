@@ -5,6 +5,7 @@
 #include "myfunctions.h"
 #include "commands.h"
 #include "linked_list.h"
+#include "mem_stack.h"
 
 #define LINE_LEN 1024 //give 1KB of memory for a line, the line will undoubtedly be shorter, but just in case...
 
@@ -15,13 +16,15 @@ int main() {
 	printf("Initialized input buffer.\n");
 
 	init_memtrace();
+	initStack();
 
 	printf("Initialized memtrace.\n");
 
+	pushStack("main");
 	Commands* com_arr = makeCommands(); // use our pseudo constructor to make a Commands object for us.
 	// printf("Initialized commands array.\n");
 	Header* list_head = initHead();
-	// printf("Initialized linked list\n");
+	// printf("Initialized linked list\n");	
 
 	// code goes here
 
@@ -35,6 +38,7 @@ int main() {
 
 	}
 
+	displayStack();
 	displayCommands(com_arr);
 	displayList(list_head);
 
@@ -42,6 +46,7 @@ int main() {
 	
 	freeCom(com_arr); // free up the memory given by makeCommands()
 	freeList(list_head); // free up the memory given to our linked list.
+	freeStack();
 	com_arr = NULL;
 	list_head = NULL;
 	close_memtrace();
