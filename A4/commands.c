@@ -3,13 +3,13 @@
 #include <string.h>
 
 #include "commands.h"
+#include "mem_stack.h"
 #include "myfunctions.h"
 
 Commands* makeCommands() {
 
-	printf("Function was called\n");
+	pushStack("makeCommands");
 	Commands* com = (Commands*)malloc(sizeof(Commands));
-	printf("Allocated memory for the object.\n");
 	com -> size = 0;
 	com -> capacity = 10;
 	com -> data = (char**)malloc(sizeof(char*) * com->capacity);
@@ -22,6 +22,7 @@ Commands* makeCommands() {
 // We assume that newEntry is a valid C-string with a null terminator. It returns nothing.
 void add(Commands* c, char* newEntry) {
 
+	pushStack("add");
 	if ( c->size == c->capacity) {
 		c->capacity *= 1.5;
 		c->data = (char**)realloc(c->data, c->capacity * sizeof(char*));
@@ -34,6 +35,7 @@ void add(Commands* c, char* newEntry) {
 
 void displayCommands(Commands* c) {
 
+	pushStack("displayCommands");
 	for (int i = 0; i < c->size; i++) {
 		printf("Line %d - Command from Array: %s\n", i, c->data[i]);
 	}
@@ -43,6 +45,7 @@ void displayCommands(Commands* c) {
 // This function assumes that the passed in Commands struct has been initialized and is not an invalid pointer.
 void freeCom(Commands* c) {
 
+	pushStack("freeCom");
 	for (int i = 0; i < c->size; i++) { // TODO this might throw an error when testing, depending on add implementation.
 		free(c->data[i]);
 	}
