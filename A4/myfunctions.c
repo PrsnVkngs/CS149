@@ -17,40 +17,40 @@ void init_memtrace() {
 
 }
 
-void* MALLOC(int size, char* file, int line) {
+void* MALLOC(int size, char* file, int line, const char* func) {
 
 #undef malloc
-	printf("Entered malloc\n");
-	void* p = stdmalloc(size);
-	printf("Allocated memory for the new pointer\n");
+	// printf("Entered malloc\n");
+	void* p = malloc(size);
+	// printf("Allocated memory for the new pointer\n");
 	fprintf(memtrace_file, "File %s, line %d, allocated new memory segment at address %p to size %d\n", file, line, p, size);
-	fprintf(stderr, "File %s, line %d allocated mem at %p of size %d\n", file, line, p, size);
+	// fprintf(stderr, "File %s, line %d allocated mem at %p of size %d\n", file, line, p, size);
 
-#define malloc(size) MALLOC(size, __FILE__, __LINE__)
+#define malloc(size) MALLOC(size, __FILE__, __LINE__, __func__)
 	return p;
 
 }
 
-void* REALLOC(void* p, int size, char* file, int line) {
+void* REALLOC(void* p, int size, char* file, int line, const char* func) {
 
 #undef realloc
-	void* new_p = stdrealloc(p, size);
+	void* new_p = realloc(p, size);
 	fprintf(memtrace_file, "File %s, line %d, reallocated new memory segment at address %p to new size %d\n", file, line, new_p, size);
-	fprintf(stderr, "File %s, line %d, reallocated memory at %p size %d\n", file, line, new_p, size);
+	// fprintf(stderr, "File %s, line %d, reallocated memory at %p size %d\n", file, line, new_p, size);
 
-#define realloc(p, t) REALLOC(p, t, __FILE__, __LINE__)
+#define realloc(p, t) REALLOC(p, t, __FILE__, __LINE__, __func__)
 	return new_p;
 
 }
 
-void FREE(void* p, char* file, int line) {
+void FREE(void* p, char* file, int line, const char* func) {
 #undef free
 
 	fprintf(memtrace_file, "File %s, line %d deallocated memory segment at address %p\n", file, line, p);
-	stdfree(p);
-	fprintf(stderr, "Freed memory at line %d\n", line);
+	free(p);
+	// fprintf(stderr, "Freed memory at line %d\n", line);
 
-#define free(p) FREE(p, __FILE__, __LINE__)
+#define free(p) FREE(p, __FILE__, __LINE__, __func__)
 
 }
 
