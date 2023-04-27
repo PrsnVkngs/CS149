@@ -37,6 +37,9 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
 
     // Allocate memory for the command array
     p->command = (char**)malloc(sizeof(char*) * (items+1));
+    for (int i = 0; i < items; i ++ ) {
+        p->command[i] = NULL;
+    }
 
     for(int i = 0; i < items; i++) {
         printf("Allocated memory for item %d\n", i);

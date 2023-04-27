@@ -69,7 +69,7 @@ int main(void) {
 //        }
         sprintf(message, "Finished child %d pid of parent %d", childPID, getpid());
         quickWrite(write_file, message); // repeat for the finish message.
-        sprintf(message, "Finished at %.2fd, with a duration of %.2f.\n", (double)(p->end_t.tv_sec+p->end_t.tv_nsec), elapsed);
+        sprintf(message, "Finished at %.2fd, with a duration of %.5f.\n", (double)(p->end_t.tv_sec+p->end_t.tv_nsec), elapsed);
         quickWrite(write_file, message);
 
 
@@ -125,8 +125,8 @@ int startProcess(int commandNo, char command[], char* argv[], int restarted) {
         }
 
         if ( restarted == 1 ) {
-            printf("RESTARTING");
-            fprintf(stderr, "RESTARTING");
+            printf("RESTARTING\n");
+            fprintf(stderr, "RESTARTING\n");
         }
         printf("Starting command %d: child %d of parent %d\n", commandNo, getpid(), getppid());
         int exec_result = execvp(command, argv); // execvp should take over from here.
