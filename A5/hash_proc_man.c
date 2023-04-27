@@ -94,6 +94,8 @@ int main(void) {
 
     }
 
+    printf("I'm done waiting!\n");
+
     freeTable();
 
     return 0; // end of program.
