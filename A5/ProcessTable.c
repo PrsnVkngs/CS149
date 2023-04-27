@@ -99,13 +99,29 @@ void remove_proc(int pid) {
 }
 
 void updateEnd(int pid) {
+    unsigned int result = hash(pid);
+    Process* p = table[result];
 
-    Process* p = table[hash(pid)];
-    while ( p->pid != pid && p->next != NULL ) {
+    // Check if the first element in the list is NULL
+    if (p == NULL) {
+        printf("Error: Process with PID %d not found.\n", pid);
+        return;
+    }
+
+    // Traverse the list and check for NULL pointers
+    while (p->pid != pid) {
+        if (p->next == NULL) {
+            // Process with the given PID was not found
+            printf("Error: Process with PID %d not found.\n", pid);
+            return;
+        }
         p = p->next;
     }
+
     clock_gettime(CLOCK_MONOTONIC, &p->end_t);
 }
+// end updateEnd
+
 
 void freeTable() {
     Process* curr;
@@ -116,6 +132,7 @@ void freeTable() {
             for ( int m = 0; m < curr->params; m++ ) {
                 free(curr->command[m]);
             }
+            free(curr->command);
             next = curr->next;
             free(curr);
             curr = next;
