@@ -32,10 +32,10 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
             break;
         }
     }
-    p->params = items+1;
+    p->params = items;
 
     // Allocate memory for the command array
-    p->command = (char**)malloc(sizeof(char*) * items);
+    p->command = (char**)malloc(sizeof(char*) * (items+1));
 
     for(int i = 0; i < items; i++) {
         printf("Allocated memory for item %d\n", i);
@@ -43,6 +43,7 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
         strcpy(p->command[i], com[i]);
     }
     p->command[items] = NULL;
+    printf("terminated list\n");
 
     if (table[result] == NULL) {
         table[result] = p;
@@ -54,6 +55,7 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
         }
         curr->next = p;
     }
+    printf("Inserted the item into the list.\n");
 }
 
 
