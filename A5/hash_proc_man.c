@@ -74,6 +74,7 @@ int main(void) {
 
         sprintf(write_file, "%d.err", childPID); // put the filename on the file in the variable.
 
+        printf("Elapsed time is %.2f", elapsed);
         if ( elapsed > 2.0 ) {
             // quickWrite(write_file, "RESTARTING\n\0");
             startProcess(p->index, p->command[0], p->command, 1);
@@ -86,7 +87,7 @@ int main(void) {
         }
         else if(status == 15 || status == 9 || status == 2 || status == 3) {
             sprintf(message, "Process was killed with code: %d", status); // set message to "killed".
-            remove_proc(childPID);
+            // remove_proc(childPID);
             continue;
         }
 
