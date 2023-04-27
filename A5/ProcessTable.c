@@ -8,7 +8,7 @@
 #include "ProcessTable.h"
 
 void initTable() {
-    table = (Process**)malloc(sizeof(Process*) * TABLE_SIZE);
+    table = (Process**)calloc(TABLE_SIZE, sizeof(Process*));
 }
 
 unsigned int hash(int pid) {
@@ -39,7 +39,7 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
     p->params = items;
     for(int i = 0; i < items; i++) {
         printf("Allocated memory for item %d\n", i);
-        p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]));
+        p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]) + 1);
         strcpy(p->command[i], com[i]);
     }
 

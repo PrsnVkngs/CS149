@@ -15,7 +15,7 @@ typedef struct ProcessNode {
 
     int pid, index, params;
     struct timespec start_t, end_t;
-    char* command[MAX_PARAMS];
+    char** command;
     struct ProcessNode* next;
 
 } Process;
