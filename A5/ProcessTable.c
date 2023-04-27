@@ -38,8 +38,8 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
     }
     p->params = items;
     for(int i = 0; i < items; i++) {
-        p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]));
         printf("Allocated memory for item %d\n", i);
+        p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]));
         strcpy(p->command[i], com[i]);
     }
 
