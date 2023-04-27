@@ -63,18 +63,19 @@ int main(void) {
         Process* p = get(childPID);
         updateEnd(childPID);
         double elapsed = (double)(p->end_t.tv_sec - p->start_t.tv_sec);
+        elapsed += (p->end_t.tv_nsec - p->start_t.tv_nsec) / 1000000000.0;
 //        if ( elapsed > 2.0 ) {
 //            quickWrite(write_file, "RESTARTING\n\0");
 //        }
         sprintf(message, "Finished child %d pid of parent %d", childPID, getpid());
         quickWrite(write_file, message); // repeat for the finish message.
-        sprintf(message, "Finished at %.2fd, with a duration of %.2f.\n", (double)p->end_t.tv_sec, elapsed);
+        sprintf(message, "Finished at %.2fd, with a duration of %.2f.\n", (double)(p->end_t.tv_sec+p->end_t.tv_nsec), elapsed);
         quickWrite(write_file, message);
 
 
         sprintf(write_file, "%d.err", childPID); // put the filename on the file in the variable.
 
-        printf("Elapsed time is %.2f\n", elapsed);
+        printf("Elapsed time is %.5f\n", elapsed);
         if ( elapsed > 2.0 ) {
             // quickWrite(write_file, "RESTARTING\n\0");
             startProcess(p->index, p->command[0], p->command, 1);
