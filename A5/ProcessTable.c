@@ -32,7 +32,7 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
             break;
         }
     }
-    p->params = items;
+    p->params = items+1;
 
     // Allocate memory for the command array
     p->command = (char**)malloc(sizeof(char*) * items);
@@ -42,6 +42,7 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
         p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]) + 1);
         strcpy(p->command[i], com[i]);
     }
+    p->command[items] = NULL;
 
     if (table[result] == NULL) {
         table[result] = p;

@@ -55,6 +55,7 @@ int main(void) {
     int status;
     char write_file[20];
     char message[50];
+    printf("Now going to wait for processes to finish.\n");
     while((childPID = wait(&status)) > 0) {
 
         sprintf(write_file, "%d.out", childPID);
