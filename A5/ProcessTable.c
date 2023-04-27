@@ -37,6 +37,10 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
         }
     }
     p->params = items;
+
+    // Allocate memory for the command array
+    p->command = (char**)malloc(sizeof(char*) * items);
+
     for(int i = 0; i < items; i++) {
         printf("Allocated memory for item %d\n", i);
         p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]) + 1);
@@ -57,6 +61,7 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
         curr->next = p;
     }
 }
+
 
 Process* get(int pid) {
     unsigned int result = hash(pid);
