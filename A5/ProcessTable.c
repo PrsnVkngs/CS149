@@ -9,12 +9,13 @@
 
 void initTable() {
     table = (Process**)calloc(TABLE_SIZE, sizeof(Process*));
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        table[i] = NULL;
+    }
 }
 
 unsigned int hash(int pid) {
-
     return pid % TABLE_SIZE;
-
 }
 
 void insert(int pid, int index, char* com[MAX_PARAMS]) {
