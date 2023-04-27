@@ -124,7 +124,6 @@ int startProcess(int commandNo, char command[], char* argv[], int restarted) {
             fprintf(stderr, "RESTARTING");
         }
         printf("Starting command %d: child %d of parent %d\n", commandNo, getpid(), getppid());
-        insert(pid, commandNo, argv);
         int exec_result = execvp(command, argv); // execvp should take over from here.
 
         fprintf(stderr, "execvp in child %d failed with error code %d\n", getpid(), exec_result);
@@ -133,6 +132,9 @@ int startProcess(int commandNo, char command[], char* argv[], int restarted) {
         close(err_fd);
         exit(EXIT_FAILURE); // in-case execvp fails, we print an error message, then close the file descriptors we opened and exit with a failure code.
 
+    }
+    else {
+        insert(pid, commandNo, argv);
     }
 
     return pid;

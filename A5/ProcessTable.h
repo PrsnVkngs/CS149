@@ -13,8 +13,11 @@
 
 typedef struct ProcessNode {
 
-    int pid, index, params;
-    struct timespec start_t, end_t;
+    int pid;
+    int index;
+    int params;
+    struct timespec start_t;
+    struct timespec end_t;
     char** command;
     struct ProcessNode* next;
 

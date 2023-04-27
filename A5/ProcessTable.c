@@ -19,6 +19,9 @@ unsigned int hash(int pid) {
 
 void insert(int pid, int index, char* com[MAX_PARAMS]) {
 
+    unsigned int result = hash(pid);
+    printf("In insert, The hash for pid %d is %d.\n", pid, result);
+
     Process* p = (Process*)malloc(sizeof(Process));
     p->pid = pid;
     p->index = index;
@@ -39,9 +42,6 @@ void insert(int pid, int index, char* com[MAX_PARAMS]) {
         p->command[i] = (char*)malloc(sizeof(char) * strlen(com[i]) + 1);
         strcpy(p->command[i], com[i]);
     }
-
-    unsigned int result = hash(pid);
-    printf("In insert, The hash for pid %d is %d.\n", pid, result);
 
     if (table[result] == NULL) {
         table[result] = p;
