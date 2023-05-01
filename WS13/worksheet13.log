@@ -1,0 +1,25 @@
+  728  cd apue.3e
+  729  ls
+  730  rsync -arv filedir/ filedir1/
+  731  cp -r filedir/ filedir1/
+  732  ls -latr filedir/; ls -latr filedir1/
+  733  ls
+  734  cd filedir1
+  735  ls
+  736  cd filedir/
+  737  ls
+  738  cd ../..
+  739  ls
+  740  cd filedir1
+  741  du
+  742  ln
+  743  ln --help
+  744  df
+  745  df -h
+  746  df --help
+  747  df -B
+  748  df 
+  749  find
+  750  locate
+  751  stat
+  752  history > w13.log
