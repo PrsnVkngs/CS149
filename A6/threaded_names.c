@@ -85,7 +85,7 @@ void logprint(char *message) {
 
     strftime(buffer, sizeof(buffer), "%d/%m/%Y %I:%M:%S %p", timeinfo);
 
-    printf("Logindex %d, thread %d, PID %ld, %s: %s\n", logIndex, pthread_self(), getpid(), buffer, message);
+    printf("Logindex %d, thread %ld, PID %d, %s: %s\n", logIndex, pthread_self(), getpid(), buffer, message);
 }
 
 void *processFile(void *arg) {
