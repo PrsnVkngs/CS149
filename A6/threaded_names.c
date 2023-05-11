@@ -3,6 +3,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MAX_NAME_LEN 30
 #define MAX_LINE_LEN 31
@@ -20,7 +23,7 @@ pthread_mutex_t t_data_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t insert_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void *thread_runner(void *);
-void log_print(char* message);
+void log_print(char* message, pthread_t threadId);
 
 pthread_t tid1, tid2;
 //struct points to the thread that created the object.
@@ -104,16 +107,16 @@ int main(int argc, char *argv[]) {
     set = create_hash_set();
 
 //TODO similar interface as A2: give as command-line arguments three filenames of numbers (the numbers in the files are newline-separated).
-    printf("create first thread");
+    printf("create first thread\n");
     pthread_create(&tid1, NULL, thread_runner, argv[1]);
-    printf("create second thread");
+    printf("create second thread\n");
     pthread_create(&tid2, NULL, thread_runner, argv[2]);
-    printf("wait for first thread to exit");
+    printf("wait for first thread to exit\n");
     pthread_join(tid1, NULL);
-    printf("first thread exited");
-    printf("wait for second thread to exit");
+    printf("first thread exited\n");
+    printf("wait for second thread to exit\n");
     pthread_join(tid2, NULL);
-    printf("second thread exited");
+    printf("second thread exited\n");
 //TODO print out the sum variable with the sum of all the numbers
 
     displayResults(set);
@@ -127,7 +130,7 @@ int main(int argc, char *argv[]) {
 void* thread_runner(void* x) {
     pthread_t me;
     me = pthread_self();
-    printf("This is thread %llu (p=%p)", me, p);
+    printf("This is thread %lu (p=%p)\n", me, p);
     pthread_mutex_lock(&t_data_lock); // critical section starts
     if (p == NULL) {
         p = (THREAD_DATA *) malloc(sizeof(THREAD_DATA));
@@ -135,9 +138,9 @@ void* thread_runner(void* x) {
     }
     pthread_mutex_unlock(&t_data_lock); // critical section ends
     if (p == NULL || p->creator != me) {
-        printf("This is thread %llu and I can access the THREAD_DATA %p", me, p);
+        printf("This is thread %lu and I can access the THREAD_DATA %p\n", me, p);
     } else {
-        printf("This is thread %llu and I created THREAD_DATA %p", me, p);
+        printf("This is thread %lu and I created THREAD_DATA %p\n", me, p);
     }
 
     FILE *nameFile = fopen(x, "r");
@@ -146,7 +149,7 @@ void* thread_runner(void* x) {
     pthread_mutex_lock(&message_lock);
     char message[50];
     sprintf(message, "I have opened this file: %s\n", (char*)x);
-    log_print(message);
+    log_print(message, me);
     pthread_mutex_unlock(&message_lock);
 
     char line[MAX_LINE_LEN];
@@ -191,7 +194,9 @@ argv)....
 // critical section starts
     pthread_mutex_lock(&t_data_lock);
     if (p != NULL && p->creator == me) {
-        printf("This is thread %llu and I delete THREAD_DATA", me);
+	char buff[75];
+	sprintf(buff, "This is thread %lu and I delete THREAD_DATA\n", me);
+	log_print(buff, me);
 /**
 * TODO Free the THREADATA object.
 * Freeing should be done by the same thread that created it.
@@ -202,7 +207,9 @@ argv)....
         p = NULL;
 
     } else {
-        printf("This is thread %llu and I can access the THREAD_DATA", me);
+	char buff[75];
+	sprintf(buff, "This is thread %lu and I can access the THREAD_DATA", me);
+	log_print(buff, me);
     }
     pthread_mutex_unlock(&t_data_lock);
 // TODO critical section ends
@@ -212,7 +219,7 @@ argv)....
 }//end thread_runner
 
 // This is a critical section piece of code, need a mutex lock before and after it.
-void log_print(char* message) {
+void log_print(char* message, pthread_t threadId) {
 
     time_t rawTime;
     struct tm *timeInfo;
@@ -223,6 +230,6 @@ void log_print(char* message) {
 
     strftime(buffer, sizeof(buffer), "%d/%m/%Y %I:%M:%S %p", timeInfo);
 
-    printf("Logindex %d, thread %llu, PID %d, %s: %s\n", logIndex++, pthread_self(), getpid(), buffer, message);
+    printf("Logindex %d, thread %lu, PID %d, %s: %s\n", logIndex++, threadId, (int) getpid(), buffer, message);
 
 }
