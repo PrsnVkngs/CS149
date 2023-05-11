@@ -2,14 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <time.h>
+#include <stdbool.h>
 
 #define MAX_NAME_LEN 30
 #define MAX_LINE_LEN 31
 #define MAX_NAMES 100
-#define NUM_THREADS 2
+
+//thread mutex lock for access to the log index
+//TODO you need to use this mutexlock for mutual exclusion
+//when you print log messages from each thread
+pthread_mutex_t message_lock = PTHREAD_MUTEX_INITIALIZER;
+//thread mutex lock for critical sections of allocating THREAD_DATA
+//TODO you need to use this mutexlock for mutual exclusion
+pthread_mutex_t t_data_lock = PTHREAD_MUTEX_INITIALIZER;
+//thread mutex lock for access to the name counts data structure
+//TODO you need to use this mutexlock for mutual exclusion
+pthread_mutex_t insert_lock = PTHREAD_MUTEX_INITIALIZER;
+
+void *thread_runner(void *);
+void log_print(char* message);
+
+pthread_t tid1, tid2;
+//struct points to the thread that created the object.
+//This is useful for you to know which is thread1. Later thread1 will also deallocate.
+typedef struct THREAD_DATA_STRUCT {
+    pthread_t creator;
+} THREAD_DATA;
+
+THREAD_DATA *p = NULL;
+//variable for indexing of messages by the logging function.
+int logIndex = 0;
+int *logip = &logIndex;
 
 typedef struct {
     char key[MAX_NAME_LEN];
@@ -19,12 +42,6 @@ typedef struct {
 typedef struct {
     NameEntry *entries;
 } HashSet;
-
-typedef struct {
-    char *filename;
-    int thread_id;
-    HashSet *set;
-} ThreadData;
 
 unsigned int hash_name(char *name) {
     unsigned int hash = 5381;
@@ -37,7 +54,7 @@ unsigned int hash_name(char *name) {
     return hash % MAX_NAMES;
 }
 
-HashSet *create_hash_set() {
+HashSet* create_hash_set() {
     HashSet *set = (HashSet *)malloc(sizeof(HashSet));
     set->entries = (NameEntry *)calloc(MAX_NAMES, sizeof(NameEntry));
     return set;
@@ -71,35 +88,72 @@ void freeSet(HashSet *set) {
     free(set);
 }
 
-pthread_mutex_t logMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t setMutex = PTHREAD_MUTEX_INITIALIZER;
-int logIndex = 1;
+/*********************************************************
+// function main
+*********************************************************/
 
-void logprint(char *message) {
-    time_t rawtime;
-    struct tm *timeinfo;
-    char buffer[80];
+HashSet* set = NULL;
 
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
+int main(int argc, char *argv[]) {
 
-    strftime(buffer, sizeof(buffer), "%d/%m/%Y %I:%M:%S %p", timeinfo);
+    if (argc != 3) {
+        printf("Usage: %s <file1> <file2>\n", argv[0]);
+        return 1;
+    }
 
-    printf("Logindex %d, thread %ld, PID %d, %s: %s\n", logIndex, pthread_self(), getpid(), buffer, message);
-}
+    set = create_hash_set();
 
-void *processFile(void *arg) {
-    ThreadData *data = (ThreadData *) arg;
-    FILE *nameFile;
+//TODO similar interface as A2: give as command-line arguments three filenames of numbers (the numbers in the files are newline-separated).
+    printf("create first thread");
+    pthread_create(&tid1, NULL, thread_runner, argv[1]);
+    printf("create second thread");
+    pthread_create(&tid2, NULL, thread_runner, argv[2]);
+    printf("wait for first thread to exit");
+    pthread_join(tid1, NULL);
+    printf("first thread exited");
+    printf("wait for second thread to exit");
+    pthread_join(tid2, NULL);
+    printf("second thread exited");
+//TODO print out the sum variable with the sum of all the numbers
+
+    displayResults(set);
+    freeSet(set);
+
+    exit(0);
+}//end main
+/**********************************************************************
+// function thread_runner runs inside each thread
+**********************************************************************/
+void* thread_runner(void* x) {
+    pthread_t me;
+    me = pthread_self();
+    printf("This is thread %llu (p=%p)", me, p);
+    pthread_mutex_lock(&t_data_lock); // critical section starts
+    if (p == NULL) {
+        p = (THREAD_DATA *) malloc(sizeof(THREAD_DATA));
+        p->creator = me;
+    }
+    pthread_mutex_unlock(&t_data_lock); // critical section ends
+    if (p == NULL || p->creator != me) {
+        printf("This is thread %llu and I can access the THREAD_DATA %p", me, p);
+    } else {
+        printf("This is thread %llu and I created THREAD_DATA %p", me, p);
+    }
+
+    FILE *nameFile = fopen(x, "r");
+
+    // file open critical section
+    pthread_mutex_lock(&message_lock);
+    char message[50];
+    sprintf(message, "I have opened this file: %s\n", (char*)x);
+    log_print(message);
+    pthread_mutex_unlock(&message_lock);
+
     char line[MAX_LINE_LEN];
     char name[MAX_NAME_LEN + 1];
     int line_num = 1;
 
-    logprint(data->logMutex, data->logIndex, "opened file", data->filename);
-
-    nameFile = fopen(data->filename, "r");
     if (nameFile == NULL) {
-        logprint(data->logMutex, data->logIndex, "failed to open file", data->filename);
         pthread_exit(NULL);
     }
 
@@ -112,52 +166,63 @@ void *processFile(void *arg) {
         }
 
         if (sscanf(line, "%30[^\n]", name) == 1) {
-            pthread_mutex_lock(data->countMutex);
-            put(data->set, name);
-            pthread_mutex_unlock(data->countMutex);
-        } 
-	else {
+            pthread_mutex_lock(&insert_lock);
+            put(set, name);
+            pthread_mutex_unlock(&insert_lock);
+        } else {
             printf("error reading line %d\n", line_num);
         }
         line_num++;
     }
 
     fclose(nameFile);
-    pthread_exit(NULL);
-}
 
-int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        printf("Usage: %s <file1> <file2>\n", argv[0]);
-        return 1;
+/**
+* //TODO implement any thread name counting functionality you need.
+* Assign one file per thread. Hint: you can either pass each argv filename as a
+thread_runner argument from main.
+* Or use the logIndex to index argv, since every thread will increment the
+logIndex anyway
+* when it opens a file to print a log message (e.g. logIndex could also index
+argv)....
+* //Make sure to use any mutex locks appropriately
+*/
+// TODO use mutex to make this a start of a critical section
+// critical section starts
+    pthread_mutex_lock(&t_data_lock);
+    if (p != NULL && p->creator == me) {
+        printf("This is thread %llu and I delete THREAD_DATA", me);
+/**
+* TODO Free the THREADATA object.
+* Freeing should be done by the same thread that created it.
+* See how the THREAD_DATA was created for an example of how this is done.
+*/
+
+        free(p);
+        p = NULL;
+
+    } else {
+        printf("This is thread %llu and I can access the THREAD_DATA", me);
     }
+    pthread_mutex_unlock(&t_data_lock);
+// TODO critical section ends
+    pthread_exit(NULL);
+//return NULL;
+    return NULL;
+}//end thread_runner
 
-    pthread_t thread1, thread2;
-    pthread_mutex_t countMutex, logMutex, threadDataMutex;
-    pthread_mutex_init(&countMutex, NULL);
-    pthread_mutex_init(&logMutex, NULL);
-    pthread_mutex_init(&threadDataMutex, NULL);
+// This is a critical section piece of code, need a mutex lock before and after it.
+void log_print(char* message) {
 
-    int logIndex = 0;
-    HashSet *set = create_hash_set();
+    time_t rawTime;
+    struct tm *timeInfo;
+    char buffer[80];
 
-    ThreadData data1 = {argv[1], set, &countMutex, &logMutex, &threadDataMutex, &logIndex};
-    ThreadData data2 = {argv[2], set, &countMutex, &logMutex, &threadDataMutex, &logIndex};
+    time(&rawTime);
+    timeInfo = localtime(&rawTime);
 
-    pthread_create(&thread1, NULL, processFile, (void *)&data1);
-    pthread_create(&thread2, NULL, processFile, (void *)&data2);
+    strftime(buffer, sizeof(buffer), "%d/%m/%Y %I:%M:%S %p", timeInfo);
 
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
+    printf("Logindex %d, thread %llu, PID %d, %s: %s\n", logIndex++, pthread_self(), getpid(), buffer, message);
 
-    displayResults(set);
-
-    freeSet(set);
-
-    pthread_mutex_destroy(&countMutex);
-    pthread_mutex_destroy(&logMutex);
-    pthread_mutex_destroy(&threadDataMutex);
-
-    return 0;
 }
-
